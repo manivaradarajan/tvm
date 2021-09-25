@@ -187,16 +187,7 @@ def _pasuram_number(title):
 
 class BlogSpider(scrapy.Spider):
     name = 'blogspider'
-    start_urls = [
-        #'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1-1-1-uyarvara-uyarnalam'
-        #'http://divyaprabandham.koyil.org/index.php/2018/11/thiruvaimozhi-7-9-2-en-solli-nirpan/'
-        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-3-3-alumalar/',
-        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-3-5-kodiyar-mada/',
-        #'http://divyaprabandham.koyil.org/index.php/2019/03/thiruvaimozhi-8-4-1-varkada-aruvi/',
-        #'http://divyaprabandham.koyil.org/index.php/2019/03/thiruvaimozhi-8-4-3-en-amar-peruman/',
-        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-2-nangal/',
-        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-3-angumingum/',
-        #'http://divyaprabandham.koyil.org/index.php/2019/03/thiruvaimozhi-8-4-varkada/',
+    patthu_urls = [
         'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1st-centum/',
         'http://divyaprabandham.koyil.org/index.php/2015/11/thiruvaimozhi-2nd-centum/',
         'http://divyaprabandham.koyil.org/index.php/2016/07/thiruvaimozhi-3rd-centum/',
@@ -208,7 +199,8 @@ class BlogSpider(scrapy.Spider):
         'http://divyaprabandham.koyil.org/index.php/2019/06/thiruvaimozhi-9th-centum/',
         'http://divyaprabandham.koyil.org/index.php/2019/10/thiruvaimozhi-10th-centum/',
     ]
-
+    
+    start_urls = [] + patthu_urls
         
     def _tvm_page(self, response):
         return 'thiruvAimozhi' in response.xpath(ENTRY_TITLE).get()
@@ -218,8 +210,10 @@ class BlogSpider(scrapy.Spider):
         if not self._tvm_page(response):
             return
 
-        links = response.xpath(LINKS)
-        yield from response.follow_all(links, self.parse)
+        follow_links = False
+        if follow_links:
+            links = response.xpath(LINKS)
+            yield from response.follow_all(links, self.parse)
 
         entry_content = response.xpath(ENTRY_CONTENT)
         converter = html2text.HTML2Text()
@@ -228,6 +222,10 @@ class BlogSpider(scrapy.Spider):
         title = converter.handle(entry_content.xpath(ENTRY_TITLE).get()).strip('\n').rstrip('\n')
         page_type, number = _page_type_and_number(title)
         if page_type != PageType.PASURAM:
+            return
+
+        force_recrawl_set = {'9.8.11', '10.4.11'}
+        if not (len(force_recrawl_set) > 0 and number in force_recrawl_set):
             return
 
         p = process_pasuram_page(entry_content)
