@@ -57,7 +57,7 @@ PASURAM_PAGE = [
     ['marker', PADA_URAI_HEADING ],
     ['content', 'pada_urai'],
     ['marker', TRANSLATION_HEADING ], # //h3[starts-with(., "vyAk")]/preceding::node()
-    ['content', 'translation'],
+#    ['content', 'translation'],
     ['marker', COMMENTARIES_HEADING ],
     ['marker', HEADING_6000 ],
     ['content', '6000'],
@@ -66,8 +66,8 @@ PASURAM_PAGE = [
     ['marker', HEADING_24000 ],
     ['content', '24000'],
     ['marker', HEADING_36000 ],
-    ['content', '36000'],
-    ['marker', PASURAM_PAGE_END ] # //p[starts-with(., "In the next")]/preceding::node()
+#    ['content', '36000'],
+#    ['marker', PASURAM_PAGE_END ] # //p[starts-with(., "In the next")]/preceding::node()
 ]
 
     
@@ -146,11 +146,28 @@ def process_pasuram_page(content):
             #print('from', to_expr)
 
             xpath_expr = xpath_from_until(from_expr[1], to_expr[1])
-            print(xpath_expr)
             selection = content.xpath(xpath_expr)
+            if not selection:
+                print(xpath_expr)
             #print('selection', converter.handle(selection.get()))
 
             page_contents[tag] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
+
+    # translation from 12000
+    from_expr = '//h3[starts-with(., "Simple")]/following-sibling::node()'
+    to_expr = '//h3[starts-with(., "vyA")]/preceding-sibling::node()'
+    xpath_expr = '%s[count(. | %s) = count(%s)]' % (from_expr, to_expr, to_expr)
+    print('trans', xpath_expr)
+    selection = content.xpath(xpath_expr)
+    page_contents['translation'] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
+
+    # 36000
+    from_expr = '//strong[contains(., "Highlights from nampiLLai‘s vyAkyAnam")]/following::node()'
+    to_expr = '//p[contains(., "In the next article")]/preceding::node()'
+    xpath_expr = '%s[count(. | %s) = count(%s)]' % (from_expr, to_expr, to_expr)
+    print('36000', xpath_expr)
+    selection = content.xpath(xpath_expr)
+    page_contents['36000'] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
 
     return page_contents
 
@@ -172,7 +189,8 @@ def _pasuram_number(title):
 class BlogSpider(scrapy.Spider):
     name = 'blogspider'
     start_urls = [
-        'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1-1-1-uyarvara-uyarnalam'
+        #'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1-1-1-uyarvara-uyarnalam'
+        'http://divyaprabandham.koyil.org/index.php/2018/11/thiruvaimozhi-7-9-2-en-solli-nirpan/'
     ]
 
     
