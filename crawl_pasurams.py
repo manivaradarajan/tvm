@@ -190,6 +190,13 @@ class BlogSpider(scrapy.Spider):
     start_urls = [
         #'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1-1-1-uyarvara-uyarnalam'
         #'http://divyaprabandham.koyil.org/index.php/2018/11/thiruvaimozhi-7-9-2-en-solli-nirpan/'
+        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-3-3-alumalar/',
+        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-3-5-kodiyar-mada/',
+        #'http://divyaprabandham.koyil.org/index.php/2019/03/thiruvaimozhi-8-4-1-varkada-aruvi/',
+        #'http://divyaprabandham.koyil.org/index.php/2019/03/thiruvaimozhi-8-4-3-en-amar-peruman/',
+        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-2-nangal/',
+        #'http://divyaprabandham.koyil.org/index.php/2019/02/thiruvaimozhi-8-3-angumingum/',
+        #'http://divyaprabandham.koyil.org/index.php/2019/03/thiruvaimozhi-8-4-varkada/',
         'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1st-centum/',
         'http://divyaprabandham.koyil.org/index.php/2015/11/thiruvaimozhi-2nd-centum/',
         'http://divyaprabandham.koyil.org/index.php/2016/07/thiruvaimozhi-3rd-centum/',
@@ -202,10 +209,13 @@ class BlogSpider(scrapy.Spider):
         'http://divyaprabandham.koyil.org/index.php/2019/10/thiruvaimozhi-10th-centum/',
     ]
 
+        
+    def _tvm_page(self, response):
+        return 'thiruvAimozhi' in response.xpath(ENTRY_TITLE).get()
+
     
     def parse(self, response):
-        page_check = response.xpath(TVM_PAGE_CHECK)
-        if not page_check.get():
+        if not self._tvm_page(response):
             return
 
         links = response.xpath(LINKS)
