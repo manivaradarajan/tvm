@@ -9,6 +9,7 @@ import sys
 TVM_PAGE_CHECK = '//div[contains(@class, "category-line")]/a[contains(text(), "thiruvAimozhi")]'
 ENTRY_TITLE = '//h2[contains(@class, "entry-title")]'
 ENTRY_CONTENT = '//div[contains(@class, "entry-content")]'
+LINKS = '//div[contains(@class, "entry-content")]//li/a[contains(@href, "divyaprabandham.koyil.org")]'
 
 COMMENTATORS = {
     '6000': 'thirukkurukaippirAn piLLAn',
@@ -120,8 +121,6 @@ def get_to_expr(content, i):
         if not content.xpath(to_expr[1]):
             to_expr = PASURAM_PAGE[i + 2]
             assert to_expr[0] == 'marker'
-        else:
-            raise ValueError # todo
     return to_expr
 
 def process_pasuram_page(content):
@@ -138,7 +137,7 @@ def process_pasuram_page(content):
     page_contents['number'] = number
     for i, elem in enumerate(PASURAM_PAGE):
         if elem[0] == 'content':
-            print(i, elem)
+            #print(i, elem)
             tag = elem[1]
             from_expr = PASURAM_PAGE[i - 1]
             #print('from', from_expr)
@@ -157,7 +156,7 @@ def process_pasuram_page(content):
     from_expr = '//h3[starts-with(., "Simple")]/following-sibling::node()'
     to_expr = '//h3[starts-with(., "vyA")]/preceding-sibling::node()'
     xpath_expr = '%s[count(. | %s) = count(%s)]' % (from_expr, to_expr, to_expr)
-    print('trans', xpath_expr)
+    #print('trans', xpath_expr)
     selection = content.xpath(xpath_expr)
     page_contents['translation'] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
 
@@ -165,7 +164,7 @@ def process_pasuram_page(content):
     from_expr = '//strong[contains(., "Highlights from nampiLLai‘s vyAkyAnam")]/following::node()'
     to_expr = '//p[contains(., "In the next article")]/preceding::node()'
     xpath_expr = '%s[count(. | %s) = count(%s)]' % (from_expr, to_expr, to_expr)
-    print('36000', xpath_expr)
+    #print('36000', xpath_expr)
     selection = content.xpath(xpath_expr)
     page_contents['36000'] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
 
@@ -190,7 +189,17 @@ class BlogSpider(scrapy.Spider):
     name = 'blogspider'
     start_urls = [
         #'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1-1-1-uyarvara-uyarnalam'
-        'http://divyaprabandham.koyil.org/index.php/2018/11/thiruvaimozhi-7-9-2-en-solli-nirpan/'
+        #'http://divyaprabandham.koyil.org/index.php/2018/11/thiruvaimozhi-7-9-2-en-solli-nirpan/'
+        'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1st-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2015/11/thiruvaimozhi-2nd-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2016/07/thiruvaimozhi-3rd-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2016/11/thiruvaimozhi-4th-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2017/05/thiruvaimozhi-5th-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2017/10/thiruvaimozhi-6th-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2018/07/thiruvaimozhi-7th-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2019/01/thiruvaimozhi-8th-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2019/06/thiruvaimozhi-9th-centum/',
+        'http://divyaprabandham.koyil.org/index.php/2019/10/thiruvaimozhi-10th-centum/',
     ]
 
     
@@ -199,7 +208,18 @@ class BlogSpider(scrapy.Spider):
         if not page_check.get():
             return
 
+        links = response.xpath(LINKS)
+        yield from response.follow_all(links, self.parse)
+
         entry_content = response.xpath(ENTRY_CONTENT)
+        converter = html2text.HTML2Text()
+        converter.ignore_links = True
+
+        title = converter.handle(entry_content.xpath(ENTRY_TITLE).get()).strip('\n').rstrip('\n')
+        page_type, number = _page_type_and_number(title)
+        if page_type != PageType.PASURAM:
+            return
+
         p = process_pasuram_page(entry_content)
         yield p
 
