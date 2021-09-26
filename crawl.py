@@ -21,14 +21,6 @@ def xpath_from_until(from_expr, until_expr):
     return '%s[count(. | %s) = count(%s)]' % (from_expr, until_expr, until_expr)
 
 
-# PASURAM pages
-INTRODUCTION = './p[preceding-sibling::h3[1][strong[contains(text(), "Introduction for")]]]'
-PASURAM = './p[preceding-sibling::h3[1][strong[text() = "pAsuram"]]]'
-PADA_URAI = './p[preceding-sibling::h3[1][strong[starts-with(text(), "Word-by-")]]]'
-TRANSLATION = './p[preceding-sibling::h3[1][strong[starts-with(text(), "Simple translation")]]]'
-#COMMENTARIES = './p[preceding-sibling::h3[1][contains(text(), "vyAkyAnams")]]'
-INTRO_TEMPLATE = './strong[contains(., "Introduction for")]/../following-sibling::p[contains(., "Highlights from %s‘s introduction")]'
-PASURAM_HEADING = './h3/strong[contains(., "pAsuram")]'
 
     
     

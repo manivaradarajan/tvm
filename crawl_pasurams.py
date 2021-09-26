@@ -23,7 +23,7 @@ INTRO_HEADING_COMMENTATOR_TEMPLATE = '//strong[contains(., "Highlights from %sâ€
 PASURAM_HEADING = '//h3[(. = "pAsuram")]/*'
 AUDIO_HEADING = '//h3/a[text() = "Listen"]'
 PADA_URAI_HEADING = '//h3[starts-with(., "Word-by-Word meanings")]/*'
-TRANSLATION_HEADING = '//h3[starts-with(., "Simple trans")]/*'
+TRANSLATION_HEADING = '//p[starts-with(., "Simple trans")]/*|//h3[starts-with(., "Simple trans")]/*'
 COMMENTARIES_HEADING = '//h3[starts-with(., "vyAkyAnams (comm")]/*'
 HEADING_COMMENTATOR_TEMPLATE = '//strong[contains(., "Highlights from %sâ€˜s vyAkyAnam")]'
 PASURAM_PAGE_END = '//p[(. = "In the next article we will enjoy the next pAsuram.")]'
@@ -224,11 +224,12 @@ class BlogSpider(scrapy.Spider):
         if page_type != PageType.PASURAM:
             return
 
-        force_recrawl_set = {'9.8.11', '10.4.11'}
+        force_recrawl_set = {}
         if not (len(force_recrawl_set) > 0 and number in force_recrawl_set):
             return
 
         p = process_pasuram_page(entry_content)
+        p['url'] = response.url
         yield p
 
 
