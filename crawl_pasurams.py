@@ -156,7 +156,7 @@ def process_pasuram_page(content):
     from_expr = '//h3[starts-with(., "Simple")]/following-sibling::node()'
     to_expr = '//h3[starts-with(., "vyA")]/preceding-sibling::node()'
     xpath_expr = '%s[count(. | %s) = count(%s)]' % (from_expr, to_expr, to_expr)
-    #print('trans', xpath_expr)
+    print('trans', xpath_expr)
     selection = content.xpath(xpath_expr)
     page_contents['translation'] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
 
@@ -164,7 +164,7 @@ def process_pasuram_page(content):
     from_expr = '//strong[contains(., "Highlights from nampiLLai‘s vyAkyAnam")]/following::node()'
     to_expr = '//p[contains(., "In the next article")]/preceding::node()'
     xpath_expr = '%s[count(. | %s) = count(%s)]' % (from_expr, to_expr, to_expr)
-    #print('36000', xpath_expr)
+    print('36000', xpath_expr)
     selection = content.xpath(xpath_expr)
     page_contents['36000'] = converter.handle(''.join(selection.getall())).strip('\n').rstrip('\n')
 
@@ -189,28 +189,31 @@ class BlogSpider(scrapy.Spider):
     name = 'blogspider'
     patthu_urls = [
         'http://divyaprabandham.koyil.org/index.php/2015/03/thiruvaimozhi-1st-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2015/11/thiruvaimozhi-2nd-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2016/07/thiruvaimozhi-3rd-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2016/11/thiruvaimozhi-4th-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2017/05/thiruvaimozhi-5th-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2017/10/thiruvaimozhi-6th-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2018/07/thiruvaimozhi-7th-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2019/01/thiruvaimozhi-8th-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2019/06/thiruvaimozhi-9th-centum/',
-        'http://divyaprabandham.koyil.org/index.php/2019/10/thiruvaimozhi-10th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2015/11/thiruvaimozhi-2nd-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2016/07/thiruvaimozhi-3rd-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2016/11/thiruvaimozhi-4th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2017/05/thiruvaimozhi-5th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2017/10/thiruvaimozhi-6th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2018/07/thiruvaimozhi-7th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2019/01/thiruvaimozhi-8th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2019/06/thiruvaimozhi-9th-centum/',
+        # 'http://divyaprabandham.koyil.org/index.php/2019/10/thiruvaimozhi-10th-centum/',
     ]
     
     start_urls = [] + patthu_urls
         
     def _tvm_page(self, response):
+        title = response.xpath(ENTRY_TITLE).get()
+        # print(title);
         return 'thiruvAimozhi' in response.xpath(ENTRY_TITLE).get()
 
     
     def parse(self, response):
+        # print(response)
         if not self._tvm_page(response):
             return
 
-        follow_links = False
+        follow_links = True
         if follow_links:
             links = response.xpath(LINKS)
             yield from response.follow_all(links, self.parse)
@@ -224,22 +227,13 @@ class BlogSpider(scrapy.Spider):
         if page_type != PageType.PASURAM:
             return
 
-        force_recrawl_set = {}
-        if not (len(force_recrawl_set) > 0 and number in force_recrawl_set):
-            return
+        #force_recrawl_set = {}
+        #if not (len(force_recrawl_set) > 0 and number in force_recrawl_set):
+        #return
 
+        #print("*** 3")
         p = process_pasuram_page(entry_content)
+        #print("*** 4")
+
         p['url'] = response.url
         yield p
-
-
-
-
-
-
-
-    
-            
-        
-            
-

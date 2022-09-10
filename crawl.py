@@ -21,16 +21,6 @@ def xpath_from_until(from_expr, until_expr):
     return '%s[count(. | %s) = count(%s)]' % (from_expr, until_expr, until_expr)
 
 
-
-    
-    
-    
-    
-    
-
-    ]
-
-
 def xpath_intro_6000():
     return xpath_from_until(
         INTRO_TEMPLATE_FROM % COMMENTATORS['6000'],
